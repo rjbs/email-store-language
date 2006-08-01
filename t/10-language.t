@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 BEGIN {
-	unlink( 't/test.db' );
+    unlink( 't/test.db' );
 }
 
 use File::Slurp;

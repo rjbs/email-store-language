@@ -113,14 +113,14 @@ Email::Store::Mail->has_many( languages => 'Email::Store::Mail::Language' );
 sub on_store_order { 81 }
 
 sub on_store {
-	my( $self, $mail ) = @_;
+    my( $self, $mail ) = @_;
 
-	$mail->calculate_language;
+    $mail->calculate_language;
 
-	for my $list ( $mail->lists ) {
-		my $probability = 1 / scalar( $list->posts );
-		$list->calculate_language if rand( 1 ) <= $probability;
-	}
+    for my $list ( $mail->lists ) {
+        my $probability = 1 / scalar( $list->posts );
+        $list->calculate_language if rand( 1 ) <= $probability;
+    }
 }
 
 package Email::Store::Mail;
@@ -128,26 +128,26 @@ package Email::Store::Mail;
 use Lingua::Identify qw( langof );
 
 sub calculate_language {
-	my $self      = shift;
+    my $self      = shift;
 
-	my %options   = %{ $Email::Store::Language::OPTIONS };
-	my $thresh    = delete $options{ threshold } || '0.5';
-	my %languages = langof( \%options, $self->simple->body );
-	my @langs     = sort { $languages{ $b } <=> $languages{ $a } } keys %languages;
+    my %options   = %{ $Email::Store::Language::OPTIONS };
+    my $thresh    = delete $options{ threshold } || '0.5';
+    my %languages = langof( \%options, $self->simple->body );
+    my @langs     = sort { $languages{ $b } <=> $languages{ $a } } keys %languages;
 
-	push @langs, 'en' unless @langs;
+    push @langs, 'en' unless @langs;
 
-	$_->delete for $self->languages;
+    $_->delete for $self->languages;
 
-	my $count = 0;
-	for( keys %languages ) {
-		next unless $languages{ $_ } >= $thresh;
-		$count++;
-		$self->add_to_languages( { language => $_ } );
-	}
-	unless( $count ) {
-		$self->add_to_languages( { language => $langs[ 0 ] } );
-	}
+    my $count = 0;
+    for( keys %languages ) {
+        next unless $languages{ $_ } >= $thresh;
+        $count++;
+        $self->add_to_languages( { language => $_ } );
+    }
+    unless( $count ) {
+        $self->add_to_languages( { language => $langs[ 0 ] } );
+    }
 }
 
 package Email::Store::List;
@@ -156,31 +156,31 @@ use strict;
 use warnings;
 
 sub calculate_language {
-	my $self = shift;
+    my $self = shift;
 
-	my %languages;
-	my $total = 0;
-	for my $post ( $self->posts ) {
-		my @languages = $post->languages;
-		next unless @languages;
-		$languages{ $_->language }++ for @languages;
-		$total++;
-	}
+    my %languages;
+    my $total = 0;
+    for my $post ( $self->posts ) {
+        my @languages = $post->languages;
+        next unless @languages;
+        $languages{ $_->language }++ for @languages;
+        $total++;
+    }
 
-	$_->delete for $self->languages;
+    $_->delete for $self->languages;
 
-	my $thresh = $Email::Store::Language::OPTIONS->{ threshold } || 0.5;
-	my @langs  = sort { $languages{ $b } <=> $languages{ $a } } keys %languages;
+    my $thresh = $Email::Store::Language::OPTIONS->{ threshold } || 0.5;
+    my @langs  = sort { $languages{ $b } <=> $languages{ $a } } keys %languages;
 
-	my $count = 0;
-	for( @langs ) {
-		next unless $languages { $_ } / $total >= $thresh;
-		$count++;
-		$self->add_to_languages( { language => $_ } );
-	}
-	unless( $count ) {
-		$self->add_to_languages( { language => $langs[ 0 ] } );
-	}
+    my $count = 0;
+    for( @langs ) {
+        next unless $languages { $_ } / $total >= $thresh;
+        $count++;
+        $self->add_to_languages( { language => $_ } );
+    }
+    unless( $count ) {
+        $self->add_to_languages( { language => $langs[ 0 ] } );
+    }
 }
 
 package Email::Store::List::Language;
