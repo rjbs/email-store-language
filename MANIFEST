@@ -8,3 +8,4 @@ t/98-pod_coverage.t
 t/99-pod.t
 t/email.dat
 META.yml                                 Module meta-data (added by MakeMaker)
+LICENSE
